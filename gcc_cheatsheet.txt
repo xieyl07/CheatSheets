@@ -1,0 +1,89 @@
+-o          指定输出文件名
+> gcc -omain main.c
+
+-Wall       启用所有警告(warning all)
+-Werror     将warning升级为error
+-Wno-xxx    排除某类型的警告
+> gcc -Wall -Wno-unused-variable test.c
+-Wextra     更多的警告
+-Wcast-function-type        当函数被强转为不兼容的函数指针时发出警告
+-Wempty-body                当存在空的if、else或者do while语句时发出警告
+-Wunused-parameter          当函数有未被使用的参数时发出警告，需配合-Wall
+-Wunused-but-set-parameter  当存在被设置但是未被使用的参数发出警告，需配合-Wall
+-Wsign-compare              当比较有符号和无符号值时发出警告
+
+-E          只执行预处理
+-S          只执行编译
+-c          只执行编译和汇编
+-save-temps 保存所有中间步骤文件
+-pipe       避免生成临时文件, 加快编译速度
+> $ gcc -save-temps main.c
+> $ ls
+> a.out  main.c  main.i  main.o  main.s
+t.c =(-E预处理)=> t.i(预处理文件) =(-S编译)=> t.s(汇编文件) =(-c汇编)=> t.o(未链接的二进制文件) =(链接)=> t(链接后的可执行文件)
+
+-I          指定寻找头文件的目录
+> gcc -I~/include main.c
+-L          指定寻找库文件的目录
+> gcc foo.c -L~/lib -lfoo -o foo
+-l          链接指定的静态或动态库(如果函数没有在libc库中, 就需要指定要链接的库)
+> gcc main.c -o main -lm (默认是动态链接, 所以链接libm.so(-l后的加上lib前缀))
+-static     静态库链接(链接.a, 把库的函数和其它依赖都编译进最终文件)
+> gcc -static -o main main.o -lm (必须把-lm放在后面)(因为-static,所以静态链接对应的libm.a)
+-shared     创建可被动态链接的文件
+-fPIC       产生位置无关的代码(用于创建共享库)
+> gcc -fPIC -shared -o libmax.so max.c
+
+产生.a静态库
+> g++ -c ./test.c
+> ar crv libtest.a test.o
+> gcc -L. ./main.c -ltest -o main # 因为./只有libtest.a, 链接静态库
+产生.so动态库
+> gcc -shared -fPIC -o libtest.so test.c
+> gcc -L. ./main.c -ltest -o main
+可以直接链接(gcc test.o main.c)或者把其余的文件编译成动态库或静态库之后再链接(如上)
+
+-v          打印gcc编译一个文件的所有步骤
+> $ gcc -Wall -v main.c -o main
+> Using built-in specs.
+> COLLECT_GCC=gcc
+> COLLECT_LTO_WRAPPER=/usr/lib/gcc/i686-linux-gnu/4.6/lto-wrapper
+> Target: i686-linux-gnu
+> Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=i686-linux-gnu --host=i686-linux-gnu --target=i686-linux-gnu
+> Thread model: posix
+> gcc version 4.6.3 (Ubuntu/Linaro 4.6.3-1ubuntu5)
+> ...
+
+-funsigned-char 将char视作无符号类型
+-fsigned-char 将char视作有符号类型
+
+-D          使用编译时的宏(用于ifdef的)
+> gcc -Wall -D MY_MACRO main.c -o main
+
+@           从文件中读取参数
+> $ cat @opt_file
+> -Wall -omain
+> $ gcc main.c @opt_file
+
+-std
+> gcc -std=c11 main.cc
+
+-M          生成文件关联的信息(makefile形式)
+> $ gcc -M main.c
+> main.o: main.c /usr/include/stdc-predef.h /usr/include/stdio.h \
+> /usr/include/features.h /usr/include/sys/cdefs.h \
+> /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+> /usr/include/gnu/stubs-64.h \
+> /usr/lib/gcc/x86_64-redhat-linux/4.8.5/include/stddef.h \
+> /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+> /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+> /usr/lib/gcc/x86_64-redhat-linux/4.8.5/include/stdarg.h \
+> /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+-MM         仅包括自己的头文件(makefile形式)
+
+-O0         默认, 不优化
+-Og         不影响调试的优化
+-O/O1~O3    优化程度由小到大, O3可能会出一些错误
+-Os         执行-O2所有优化选项，排除那些可能导致程序大小增加的优化选项
+
+-g          可调试的可执行文件
