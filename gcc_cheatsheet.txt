@@ -41,6 +41,7 @@ t.c =(-E预处理)=> t.i(预处理文件) =(-S编译)=> t.s(汇编文件) =(-c�
 产生.so动态库
 > gcc -shared -fPIC -o libtest.so test.c
 > gcc -L. ./main.c -ltest -o main
+> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD # 将so库的路径加入LD_LIBRARY_PATH再执行./a.out
 可以直接链接(gcc test.o main.c)或者把其余的文件编译成动态库或静态库之后再链接(如上)
 
 -v          打印gcc编译一个文件的所有步骤
