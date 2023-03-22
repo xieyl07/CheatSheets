@@ -1,0 +1,122 @@
+Working Directory -(add)-> stage -(commit)-> master -(push)-> origin/master
+Working Directory: 工作区
+stage或者叫cache或者叫index: 暂存区
+repository: 仓库. commit提交到某branch的repository
+master: 主分支
+origin/分支名: 远程仓库的某分支(主分支叫main或者master)
+可以man一下git, HIGH-LEVEL COMANDS节子命令简介. 还可以去man git-diff, git-restore等
+
+git init                    把当前目录变成Git可以管理的仓库(创建.git/)
+git add test.txt            添加文件
+git commit -m "add file"    提交到仓库(可以多次add后一次性提交)
+git status                  当前目录的文件的状态(untracked, motified未add, add未commit)
+git diff [文件]             查看工作区与暂存区或仓库(暂存区为空时)的[某文件的]区别
+git diff --staged [文件]    查看暂存区和仓库的[某文件的]区别
+git diff HEAD               工作区和仓库的区别
+git diff HEAD^ HEAD^^       查看HEAD^和HEAD^^个提交间的区别
+git diff branch1 branch2    查看两个分支上最后 commit 的内容的差别
+git log                     最近3次提交记录(commit id和commit时的注解)
+git log dev ^master         查看dev中有, master中没有的commit
+git log dev...master        查看dev和master中非共有的commit
+git log --left-right dev...master 查看非共有的commit分别属于谁
+git restore <文件>          未add, 撤销修改
+git restore --staged <文件> 已add, 从stage中撤销
+git reset --hard HEAD^      回退到上个版本
+git reset --hard HEAD^^     回退到上上个版本
+git reset --hard HEAD~10    回退10个版本
+git reset --hard 1094a      到commit id的版本(id的前几个字母就够了)
+git reflog                  commit和回退的历史记录. 可以回退后找到id, 用reset撤销回退
+git rm <文件>               从仓库删除文件, 本地文件也会被删除(rm后和add后一样, 要commit)
+git remote add origin git@github.com:xieyl07/learngit.git 添加远程仓库
+git push -u origin master   推送并关联
+git push origin master      推送到远程
+git remote rm origin        解除了本地和远程的绑定关系
+git clone git@github.com:michaelliao/gitskills.git 克隆
+
+
+==========分支管理==========
+
+git branch: list, create or delete branches.
+git switch: switch branch
+git checkout: switch branches or restore working tree files (restore + switch)
+
+git log --graph             分支合并图
+git branch                  查看branch
+git branch -r               查看远程branch
+git branch -a               查看所有branch
+git push origin :dev        删除远程仓库的dev分支
+
+1. 简单的只改dev分支不动master, 快速合并
+git branch dev              创建dev分支
+git branch -m dev devs      dev改名为devs
+git switch dev              切换到dev分支
+在dev修改提交后, switch到master
+git merge dev               在当前分支(master)合并dev分支
+如果两条线都有修改, 冲突, 冲突的文件中保存了diff的内容. merge后要手动改冲突的文件
+git branch -d dev           删除dev分支
+合并后, 删除前: git log --graph:
+*commit ec2... (HEAD -> master, dev)
+|
+|
+*
+|
+|
+*
+可见, 用默认的Fast forward merge, 是一条没有分支的log, merge只是让master指针追上了dev
+
+2. 要在log上产生分支的话, --no-ff参数
+git merge --no-ff -m "comment" dev 普通合并
+* commit 9b... (HEAD -> master)
+|\
+| |
+| |
+| * commit 02... (dev)
+|/
+|
+可见, merge被当成了一次对master的commit(要写commit comment)
+merge后master和dev并没有重合, 通常的branch图都是--no-ff来的
+如果之后在dev做一次提交, 在master上的log会看不dev, 在dev上log会只有一条线. 重新merge后可见
+单纯这样的例子, 用不用ff结果上没区别. 但是如果有user1和user2两条分支向dev添加内容, 合并起来就很怪
+
+ps. switch前必须commit所有motified. switch后文件就变成那个branch的版本了. switch前想一想!!
+但是未提交的文件在切换后还是保留原样(?).
+
+git stash                   贮藏当前未提交的文件, 使可以安心switch
+git stash list              stash记录
+git stash pop               取出同时删除stash
+git stash apply             取出但不删除stash
+git stash drop              删除stash
+git cherry-pick 4c805e2     对当前分支做id为4c80的提交的修改并提交
+注意, 如果用cherry-pick修改, 当前分支的要修改的文件必须和那次提交前的文件完全相同.
+cherry-pick和改动但未提交的文件如果重合, stash pop后会有冲突
+git branch -D dev           未merge就删除分支
+
+多人协作
+> git remote -v               查看远程仓库信息
+origin  git@github.com:michaelliao/learngit.git (fetch) origin: 仓库名. fetch: 拉取的地址
+origin  git@github.com:michaelliao/learngit.git (push) 推送的地址, 没有推送权限的话没这行
+> git push origin dev           将dev推送到远程的dev branch(不存在则新建?)
+> git branch dev origin/dev     默认只clone master, 这样拉取dev(?)
+> git pull                      冲突了则拉取, 本地修改
+
+rebase: 解决push的冲突之后提交, 会有一个分出去并合并的分支, log上不好看.
+rebase将分支上的提交挪到另一条分之后, 拉直log
+> git pull --rebase
+> git add 文件
+> git rebase --continue         
+
+标签
+git tag v1.0                    下次提交打上v1.0的tag
+git tag v0.9 fc32               提交fc32打上v0.9的tag
+git tag                         查看所有tag(按字母排序)
+git show v0.9                   查看tag详细信息
+git tag -a v0.1 -m "version 0.1 released" 1094adb 带说明的tag
+git tag -d v0.1                 删除未推送的标签
+git push origin v1.0            推送v1.0这个标签
+git push origin --tags          推送所以标签
+git push origin :refs/tags/<tagname> 删除一个远程标签
+
+创建.gitignore文件并加入需要git忽略的文件名, 支持通配符
+
+https://www.liaoxuefeng.com/wiki/896043488029600
+https://git-scm.com/book/zh/v2
