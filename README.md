@@ -2,4 +2,4 @@
 
 - [x] gcc
 - [x] git
-- [ ] gdb
+- [x] gdb
