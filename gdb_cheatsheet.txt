@@ -1,0 +1,56 @@
+gdb使用
+编译加上-g参数!
+加上-O之后会出问题, make CFLAGS='-g -O0'
+
+r(run) [< i_file]  从程序开始运行到下个breakpoint(从i_file文件获得输入)
+start [< i_file]   运行程序第一句话(从i_file文件获得输入)
+
+只要没歧义(是unique的前n个字母, tab一下能出来命令), 缩写就能用
+
+c(continue)     运行到下个bp
+l(list) [6|func]输出当前语句(或指定行/函数)的上下5行. 一共10行, 再l就下个10行
+<enter>         重复上个语句. 不要一个n一个n地按了
+p(print) j      打印变量 这些输出的$1, $2都存着, 以后再p $2就好了
+i(info) locals  当前帧所有局部变量
+display j       每次命令后都输出该变量值
+i display       所有display
+undisplay 2     删除某变量号的display, 变量号见i di输出
+watch j         每次j变化后输出j值
+i wat           info watchpoint
+set var j=1     改变变量的值
+p <语句>        语句可以赋值, 可以printf, 可以调用函数, 除了定义新变量什么都可以
+f(frame)        输出现在在哪个函数哪句话. frame 2改变过帧的话, 输出当前处于哪个帧
+bt(backtrace)   输出函数调用栈帧
+f 2             选中上上个函数(当前在#0). 首先打印函数名, 从哪句话来的.
+                之后l, p, finish那些操作也都处于那个帧中(s, n命令还是#0帧)
+i(info) f       ;
+s(step)         下句话(入函数)
+n(next)         下句话(不入函数)
+u(until)        在for最后一句的话, 运行到循环结束. 不然同next
+j(jump) 10      直接跳过第10行前的语句(不运行, 可能出问题)
+finish          当前帧(函数)运行至结束(对最外层main函数无效)
+return          当前帧直接返回(也不能手动设置返回值, 也不知道return的什么)
+break 9|func    第9行/func定义那行设置breakpoint
+b 9 if sum != 0 break ... if ... 条件breakpoint, 到bp时满足条件才停
+b basic.c:101	对某文件中的某行设置断点
+b basic.c:foo	对某文件中的某函数设置断点
+i(info) b       显示所有breakpoint
+d(delete) 2     删除某断点号的breakpoint. num js the first column jn 'info b'
+clear           清楚当前行的断点
+d               删除所有breakpoint
+disable	    	禁用断点
+enable	 	    允许断点
+q(quit)         离开gdb
+kill            终止进程
+file            装入需要调试的程序(先开gdb再file a.out这样, 不能直接run a.out)
+search          搜索源文件中的文本(据说支持正则)
+whatis j        变量类型(如int)
+edit            vim打开并编辑源码
+有edit, search, whatis, 就别^Z再vim了
+x/7b input      从input数组开头开始打印存储单元. 7组, 一个字节一组
+因为void* 或者 struct redisReply*这种结构体太多, 输出不要上来就print.
+结构体就先p sizeof(redisReply), 再x/64b pReplyType
+线程调试另说
+
+https://blog.csdn.net/songchuwang1868/article/details/86132281
+https://blog.csdn.net/qq_28351609/article/details/114855630
