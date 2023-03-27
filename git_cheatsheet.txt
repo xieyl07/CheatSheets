@@ -27,11 +27,18 @@ git reset --hard HEAD~10    回退10个版本
 git reset --hard 1094a      到commit id的版本(id的前几个字母就够了)
 git reflog                  commit和回退的历史记录. 可以回退后找到id, 用reset撤销回退
 git rm <文件>               从仓库删除文件, 本地文件也会被删除(rm后和add后一样, 要commit)
+
+==========远程==========
+
+// 对于github上还是空项目状态的项目:
 git remote add origin git@github.com:xieyl07/learngit.git 添加远程仓库
 git push -u origin master   推送并关联
 git push origin master      推送到远程
 git remote rm origin        解除了本地和远程的绑定关系
+
+// 本地没有文件, clone下来:
 git clone git@github.com:michaelliao/gitskills.git 克隆, 有.git/无需手动git init
+git fetch origin            fetch之后才能push
 
 
 ==========分支管理==========
